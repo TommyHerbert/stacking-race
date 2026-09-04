@@ -2,7 +2,7 @@
 
 Abstract, offline, schizolo (hotseat) race-betting game for web first (phone portrait), later Android/iOS. Mechanics match **Camel Up (2014 base game)** as corrected below; theme and naming are original. No camel-related terminology in UI, history, or code identifiers exposed to players.
 
-**Rules sources (precedence):** this spec → player clarifications → `docs/Camel_Up_Quick_Rules.pdf` (BGG “freechinanow”, Dec 2016). Where this spec disagrees with the PDF (notably leg ticket counts and midfield tickets), **this spec wins**.
+**Rules sources (precedence):** this spec → player clarifications → `docs/Camel_Up_Quick_Rules.pdf` (BGG “freechinanow”, Dec 2016). Where this spec disagrees with the PDF (notably leg bet counts and midfield bets), **this spec wins**.
 
 ---
 
@@ -13,7 +13,7 @@ Abstract, offline, schizolo (hotseat) race-betting game for web first (phone por
 | Platforms | Web first; Android/iOS later (same UI via Capacitor) |
 | Mode (v1) | Schizolo only — one device, players alternate; no AI, no network |
 | Performance | Prefer fast turns and a small storage footprint |
-| Graphics | Minimal; coloured rectangles for pieces; dice as numerals `1`/`2`/`3` |
+| Graphics | Minimal; coloured rectangles for pieces; dice rolls as numerals `1`/`2`/`3` |
 | Aesthetic | Sparse / ASCII-adjacent; not a heavy illustrated board |
 | Offline | Fully offline |
 | RNG | Seeded / deterministic dice sequence |
@@ -27,19 +27,19 @@ Abstract, offline, schizolo (hotseat) race-betting game for web first (phone por
 | Term | Meaning |
 |------|---------|
 | **Piece** | One of five racing tokens (colours) |
-| **Track** | Circular number-line of spaces |
+| **Track** | Linear number-line of spaces (left → right = forward) |
 | **Stack** | Ordered column of pieces on one space (bottom → top) |
-| **Leg** | One round until all roll tickets are taken |
+| **Leg** | One round until all five dice actions for that leg are taken |
 | **Race** | Full game until a piece finishes |
-| **Leg ticket** | Short-term bet on a piece for the current leg (winner stack or midfield) |
-| **Roll ticket** | Action that grants +1 cash at leg end and reveals a die |
-| **Race card** | Long-term bet on overall winner or loser |
-| **Tile** | Player’s jump / fall-back marker on the track |
-| **Jump** | Tile side: landing unit moves +1 forward; tile owner +1 cash |
-| **Fall back** | Tile side: landing unit moves −1; tile owner +1 cash |
-| **Hand** | Current player’s held tickets / tiles / race cards (context-dependent) |
-| **Cash** | Running score currency |
-| **Player A…H** | Seats; **A always starts**; order fixed clockwise A→B→… |
+| **Leg bet** | Short-term bet on a piece for the current leg (winner stack or midfield) |
+| **Dice** | The take-and-roll action / token: grants +1 points at leg end and reveals a die |
+| **Race bet** | Long-term bet on overall winner or loser |
+| **Track modifier** | Player’s jump / fall-back marker on the track |
+| **Jump** | Modifier side: landing unit moves +1 forward; owner +1 points |
+| **Fall back** | Modifier side: landing unit moves −1; owner +1 points |
+| **Hand** | Current player’s held leg bets / dice / race bets / unplayed modifier (context-dependent) |
+| **Points** | Running score |
+| **Player A…H** | Seats; **A always starts**; order fixed A→B→… |
 
 Do **not** use: camel, desert, oasis, mirage, pyramid, Egyptian pounds, or other Camel Up brand language in UI or history.
 
@@ -68,35 +68,37 @@ Do **not** use: camel, desert, oasis, mirage, pyramid, Egyptian pounds, or other
 
 - AI, network play, undo, elaborate handoff / hidden-info modes
 - Landscape layout, accessibility pass, flavour copy
-- Partnerships / crazy pieces / other edition extras
+- Partnerships / reverse pieces / other edition extras
 
 ---
 
 ## 4. Players & setup
 
 - **Player count:** 2–8 (menu choice)
-- **Starting cash:** 3 each
+- **Starting points:** 3 each
 - **Each player receives:**
-  - 5 **race cards** (one per piece colour), identity = that player’s character seat
-  - 1 **tile** (jump / fall-back double-sided)
-- **Bank:** unlimited cash for payouts; players **cannot go below 0** (unpayable −1 is skipped)
+  - 5 **race bets** (one per piece colour)
+  - 1 **track modifier** (jump / fall-back double-sided)
+- **Bank:** unlimited points for payouts; players **cannot go below 0** (unpayable −1 is skipped)
 - **Start player:** Player A (not “youngest”)
 
 ### 4.1 Board & pieces
 
-- **Track:** 16 spaces, numbered 1–16; finish is crossing past the end of the circuit (see §8). Spaces form a loop for movement purposes as in the physical board.
-- **Five pieces**, five matching dice; each die faces **1, 2, 3** (two of each face on the physical die — engine may model faces as `{1,2,3}` with equal probability, or as a bag of six faces `1,1,2,2,3,3`; **prefer six-face bag** for fidelity when shuffling into the “pyramid”).
+- **Track:** 16 spaces, numbered **1–16** left to right in the UI. Forward = higher number. Finish = moving **past space 16** (see §8). Movement never wraps.
+- **Five pieces**, five matching dice colours; each roll is **1, 2, or 3 with equal probability**. No need to model a physical six-face die.
 - **Starting positions:** roll all five dice once; place each piece on space = face value. Same space → stack in **arbitrary order** (engine: shuffle stack order with seeded RNG).
-- Place all five dice into the roll pool (hidden). Place **five roll tickets** in a stack.
+- Place all five dice into the hidden roll pool. Make **five dice** actions available for the leg (the “dice” stack / supply).
 
-### 4.2 Leg ticket market (per colour)
+### 4.2 Leg bet market (per colour)
 
 Two markets per piece colour:
 
-1. **Winner tickets** — stack of **4**, top to bottom: **5, 3, 2, 2** (top taken first).
-2. **Midfield ticket** — **one** per colour (see §7 for payouts).
+1. **Winner bets** — stack of **4**, top to bottom: **5, 3, 2, 2** (top taken first).
+2. **Midfield bet** — **one** per colour (see §7 for payouts).
 
 *(Overrides the BGG quick-rules PDF, which lists only three winner tiles 5/3/2 and no midfield.)*
+
+**UI:** in the leg **stacks** area, each colour shows its **winner stack** with a **midfield slot beside it** (present or empty once taken).
 
 ---
 
@@ -106,49 +108,50 @@ Turns proceed A→B→… wrapping. On a turn the active player takes **exactly 
 
 | # | Action | Notes |
 |---|--------|--------|
-| 1 | **Take a leg ticket** | Top of any colour’s **winner** stack, **or** that colour’s **midfield** ticket if still available. No limit on how many tickets a player may hold (including duplicates). One ticket per turn. |
-| 2 | **Place or move tile** | Place own tile on a legal space, choosing **jump** or **fall back** face up. If already on the board, this action relocates it. |
-| 3 | **Take roll ticket** | Take top roll ticket (+1 cash at leg end). Reveal one die from the pool; move that colour’s piece by the face value; park the die as “used”. |
-| 4 | **Place race card** | Choose one held race card and place it on the **overall winner** pile or **overall loser** pile. Card is face-down on the board UI; cannot be retrieved. May place further cards on later turns. |
+| 1 | **Take a leg bet** | Top of any colour’s **winner** stack, **or** that colour’s **midfield** bet if still available. No hold limit (including duplicates). One bet per turn. |
+| 2 | **Place or move track modifier** | Place own modifier on a legal space, choosing **jump** or **fall back**. If already on the board, this action relocates it. |
+| 3 | **Take dice** | Take one dice token (+1 points at leg end). Reveal one die from the pool; move that colour’s piece by the face value; park the die as “used”. |
+| 4 | **Place race bet** | Choose one held race bet and place it on the **overall winner** pile or **overall loser** pile. Hidden on the board UI; cannot be retrieved. Further bets allowed on later turns. |
 
 No pass, no undo.
 
-### 5.1 Tile placement legality
+### 5.1 Track modifier placement legality
 
-- Space must be **empty** of pieces and of any tile.
+- Space must be **empty** of pieces and of any track modifier.
 - **Not** space **1**.
-- **Not adjacent** to a space that already has a tile.
-- Player has only one tile; moving uses the same action.
+- **Not adjacent** to a space that already has a track modifier.
+- Player has only one modifier; moving uses the same action.
 
 ### 5.2 Movement & stacking
 
 - Moving a piece carries **all pieces above it**; pieces below stay.
 - Landing on another unit → arriving unit (stack portion) is placed **on top**.
-- Landing on **jump** → unit moves **+1** further forward; tile owner **+1 cash**. Then resolve the new space normally if needed (engine must define whether chained tile hits are possible — physical game: tile spaces are empty of other tiles and the +1/−1 lands on a camel stack or empty space; **no second tile adjacency**, so at most one tile trigger per move resolution path except the extra step from jump/fall back onto another stack).
-- Landing on **fall back** → unit moves **−1**; tile owner **+1 cash**. On fall back, the moving unit lands **under** any stack already on the destination (per classic Oasis/Mirage asymmetry: Oasis on top, Mirage underneath).
-- Ranking: farther along the race direction = ahead; same space → **higher in stack = ahead**.
+- Landing on **jump** → unit moves **+1** further forward; modifier owner **+1 points**. Arriving unit lands **on top** of any stack on the destination.
+- Landing on **fall back** → unit moves **−1**; modifier owner **+1 points**. Arriving unit lands **under** any stack on the destination.
+- **Chained modifier effects cannot occur:** adjacency forbids two modifiers on consecutive spaces, so the extra ±1 step never lands on another modifier. The engine need not special-case chains.
+- Ranking: farther forward (higher space) = ahead; same space → **higher in stack = ahead**.
 
-### 5.3 Dice / roll UI (product note)
+### 5.3 Dice UI (product note)
 
-Treating “take roll ticket” as choosing a roll from the leg **stacks**; after reveal, the roll numeral appears in the active player’s leg **hand**. Highlight moved piece(s) on the track; optional short motion (ticket + pieces + arrow on the number-line).
+“Take dice” is chosen from the leg **stacks**; after reveal, the roll numeral appears in the active player’s leg **hand**. Highlight moved piece(s) on the track; optional short motion (token + pieces + travel arrow on the number-line).
 
 ---
 
 ## 6. End of a leg
 
-Triggered when a player takes the **last (5th) roll ticket**, completes the move, **then** leg scoring runs before the next turn.
+Triggered when a player takes the **last (5th) dice** action, completes the move, **then** leg scoring runs before the next turn.
 
-1. Pass start-player marker to the **next** player clockwise (they open the next leg).
+1. Pass start-player marker to the **next** player (they open the next leg).
 2. **Score** (§7).
-3. **Cleanup:** return all winner/midfield/roll tickets to the board in initial order; return tiles to owners; return all dice to the hidden pool.
+3. **Cleanup:** return all winner/midfield bets and dice supply to the board in initial order; return track modifiers to owners; return all dice to the hidden pool.
 
 ---
 
 ## 7. Leg scoring
 
-For each ticket a player holds:
+For each bet a player holds:
 
-### 7.1 Winner tickets
+### 7.1 Winner bets
 
 | Rank of that colour | Payout |
 |---------------------|--------|
@@ -156,7 +159,7 @@ For each ticket a player holds:
 | 2nd | **+1** |
 | 3rd–5th | **−1** (skip if player would go below 0) |
 
-### 7.2 Midfield tickets (one per colour)
+### 7.2 Midfield bets (one per colour)
 
 | Rank of that colour | Payout |
 |---------------------|--------|
@@ -166,23 +169,23 @@ For each ticket a player holds:
 | 4th | **+1** |
 | 5th | **−1** |
 
-### 7.3 Roll tickets
+### 7.3 Dice
 
-Each roll ticket: **+1** cash.
+Each dice token taken this leg: **+1** points.
 
 ---
 
 ## 8. End of the race
 
-- Ends **immediately** when any piece **crosses the finish line** (board: past space 16 / into the finish / “into space 1” per PDF — engine treats finish as leaving the final stretch beyond space 16).
+- Ends **immediately** when any piece **moves past space 16** (crosses the finish).
 - First: run a full **leg scoring** round.
 - Then score **overall winner** and **overall loser** race piles:
-  - Determine winner = leading piece (top of stack if tied on space).
-  - Determine loser = rearmost piece (**bottom** of stack if several share the rearmost space).
-  - Flip each pile so **first card placed is scored first**.
-  - For cards matching the true winner/loser, payouts in order: **+8, +5, +3, +2**, then **+1** for any later correct cards.
-  - Each incorrect card: **−1** (floor at 0).
-- Most cash wins; **ties shared**.
+  - Winner = leading piece (top of stack if tied on space).
+  - Loser = rearmost piece (**bottom** of stack if several share the rearmost space).
+  - Flip each pile so **first bet placed is scored first**.
+  - Matching bets, in order: **+8, +5, +3, +2**, then **+1** for any later correct bets.
+  - Each incorrect bet: **−1** (floor at 0).
+- Most points wins; **ties shared**.
 
 ---
 
@@ -190,9 +193,9 @@ Each roll ticket: **+1** cash.
 
 | Element | Board UI | History log |
 |---------|----------|-------------|
-| Race cards on win/lose piles | **Hidden** (show **counts** only) | **Full detail** (who, colour, win vs lose) — open table |
-| Cash | Public (score control) | Updates logged |
-| Leg tickets / tiles / dice | Public | Logged |
+| Race bets on win/lose piles | **Hidden** (show **counts** only) | **Full detail** (who, colour, win vs lose) — open table |
+| Points | Public (score control) | Updates logged |
+| Leg bets / track modifiers / dice | Public | Logged |
 
 Later modes may hide race bets from history; not v1.
 
@@ -215,20 +218,36 @@ History must be a **scrollable text record** sufficient to **replay every event*
 ### 10.2 Game screen (top → bottom)
 
 1. **Top row:** Score · Opponents · History · Options  
-   - **Score:** running cash for the relevant view; tap → all players’ cash.  
+   - **Score:** running points; tap → all players’ points.  
    - **Opponents:** compact dump of **entire game state** (as dense as practical).  
    - **History:** full scrollable event log.  
    - **Options:** **Back to menu** only (more entries later).
-2. **Track:** partial number-line showing **all pieces and tiles**, plus **three empty spaces ahead** of the forwardmost relevant content (to ease tile placement).
-3. **Leg row:** **hand** (left) = taken leg/roll tickets + unplayed tile; **stacks** (right) = remaining winner/midfield tickets and roll availability.
-4. **Race row:** **hand** (left) = remaining race cards; **stacks** (right) = winner/loser piles as **counts only**.
+2. **Track:** partial **linear** number-line (see §10.3).
+3. **Leg row:** **hand** (left) = taken leg bets + dice numerals + unplayed track modifier; **stacks** (right) = per colour **winner stack + midfield slot**, plus dice supply.
+4. **Race row:** **hand** (left) = remaining race bets; **stacks** (right) = winner/loser piles as **counts only**.
 
 Active player should be obvious (e.g. “Player C’s turn”).
 
-### 10.3 Visual language
+### 10.3 Track visualisation
 
-- Pieces: coloured rectangles (stack = vertical stack of rects).
-- Dice / rolls: numerals.
+- **Not circular.** Show a left-to-right window of spaces with labels underneath.
+- Include **all pieces and track modifiers**, plus **two** empty spaces ahead of the forwardmost content (for placing modifiers).
+- Pieces = coloured rectangles stacked bottom→top in a column above their space.
+- **Jump** and **fall back** markers on the space; fall back uses a diagonal arrow **top-right → bottom-left** (Unicode e.g. `↙` U+2199). Jump can use a contrasting arrow (e.g. `↗`) if needed.
+
+Example layout (letters stand in for coloured rectangles):
+
+```text
+      R
+  G   Y
+  B   W  ↙
+  6   7  8  9 10
+```
+
+### 10.4 Visual language
+
+- Pieces: coloured rectangles.
+- Dice rolls: numerals.
 - Light motion OK for roll + move (highlight, arrow, short travel).
 
 ---
@@ -246,14 +265,23 @@ rngCursor: number          # how far the seeded stream has been consumed
 playerCount: 2..8
 activePlayer: 'A'.. 
 phase: 'turn' | 'leg_score' | 'race_score' | 'game_over' | ...
-track: spaces[1..16] → { stack: PieceColour[], tile?: { owner, side: 'jump'|'fall_back' } }
-dicePool: remaining faces/colours still in the pyramid
+track: spaces[1..16] → {
+  stack: PieceColour[],
+  modifier?: { owner, side: 'jump' | 'fall_back' }
+}
+dicePool: remaining piece-colours still unrevealed this leg
 diceUsed: revealed this leg
-legWinnerTickets: per colour → remaining values top-first
-legMidfieldTickets: per colour → available bool
-rollTicketsRemaining: 0..5
-players: per seat → { cash, legTickets[], rollTicketCount, raceCardsRemaining[], tileInHand | onBoard }
-raceWinnerPile: { player, colour }[]   # order = place order; UI hides colours
+legWinnerBets: per colour → remaining values top-first
+legMidfieldBets: per colour → available bool
+diceRemaining: 0..5       # take-dice supply this leg
+players: per seat → {
+  points,
+  legBets[],
+  diceCount,
+  raceBetsRemaining[],
+  modifierInHand | onBoard
+}
+raceWinnerPile: { player, colour }[]   # place order; UI hides colours
 raceLoserPile:  { player, colour }[]
 history: string[] | structured events
 startPlayerThisLeg: seat
@@ -267,24 +295,23 @@ Exact TypeScript types live in `packages/engine` when implemented. Saves after e
 
 1. **Framework only** — workspace tooling, empty `packages/engine` + `apps/web`, phone-sized shell, no game.
 2. Engine types + empty state + seed RNG.
-3. Constants (colours, ticket values, track length).
+3. Constants (colours, bet values, track length).
 4. Setup + serialize/continue slot.
 5. Legal actions stub → implement actions one family per commit.
 6. Menu screen.
 7. Game chrome (empty zones).
-8. Track render → leg row → race row → score/opponents/history/options.
+8. Track render → leg row (incl. midfield slots) → race row → score/opponents/history/options.
 9. Leg end scoring → race end scoring.
-10. Motion polish for rolls.
+10. Motion polish for dice.
 
 ---
 
 ## 13. Open points (non-blocking)
 
-Resolved enough to implement; revisit only if playtest disagrees:
+- Exact finish-line tests (first crossing past 16) should freeze edge cases in the engine suite.
+- Fall-back onto empty space vs under a stack: cover both in engine tests (rules are stated; tests lock them).
 
-- Exact finish-line geometry vs space indices (tests should freeze “first crossing” cases).
-- Whether fall-back onto an empty space vs under a stack needs extra diagrammed cases in engine tests.
-- Midfield ticket UI affordance among “stacks” (one slot per colour beside winner stack).
+Midfield-beside-winner in the leg stacks UI is **required** (see §4.2 / §10.2) — not an open question.
 
 ---
 
@@ -292,4 +319,5 @@ Resolved enough to implement; revisit only if playtest disagrees:
 
 | Date | Change |
 |------|--------|
-| 2026-09-04 | Initial spec from design thread + 2014 quick rules PDF; leg tickets corrected to 5/3/2/2 + midfield; race payouts 8/5/3/2/1/−1; TS/Vite plan; schizolo UX. |
+| 2026-09-04 | Initial spec from design thread + 2014 quick rules PDF; winner bets 5/3/2/2 + midfield; race payouts 8/5/3/2/1/−1; TS/Vite plan; schizolo UX. |
+| 2026-09-04 | Glossary: leg bet / dice / race bet / track modifier / points. Linear track UI (2 spaces ahead); equal-probability d3; no movement wrap; no chained modifiers; midfield slot required in stacks UI. |
