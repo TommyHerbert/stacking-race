@@ -16,11 +16,7 @@ const PIECE_COLOURS = [
 ] as const satisfies readonly PieceColour[];
 
 function emptyTrack(): TrackSpace[] {
-  const track: TrackSpace[] = [{ stack: [] }];
-  for (let space = 1; space <= TRACK_SPACE_COUNT; space += 1) {
-    track[space] = { stack: [] };
-  }
-  return track;
+  return Array.from({ length: TRACK_SPACE_COUNT }, () => ({ stack: [] }));
 }
 
 function emptyLegWinnerBets(): Record<PieceColour, WinnerBetValue[]> {

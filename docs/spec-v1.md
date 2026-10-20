@@ -84,9 +84,9 @@ Do **not** use: camel, desert, oasis, mirage, pyramid, Egyptian pounds, or other
 
 ### 4.1 Board & pieces
 
-- **Track:** 16 spaces, numbered **1–16** left to right in the UI. Forward = higher number. Finish = moving **past space 16** (see §8). Movement never wraps.
+- **Track:** 16 spaces. **UI labels** are **1–16** left to right; the **engine uses 0-based indices 0–15**. Forward = higher index. Finish = moving **past the last space** (see §8). Movement never wraps.
 - **Five pieces**, five matching dice colours; each roll is **1, 2, or 3 with equal probability**. No need to model a physical six-face die.
-- **Starting positions:** roll all five dice once; place each piece on space = face value. Same space → stack in **arbitrary order** (engine: shuffle stack order with seeded RNG).
+- **Starting positions:** roll all five dice once; place each piece on engine index `face - 1` (so a roll of 1 → UI space 1 / index 0). Same space → stack in **arbitrary order** (engine: shuffle stack order with seeded RNG).
 - Place all five dice into the hidden roll pool. Make **five dice** actions available for the leg (the “dice” stack / supply).
 
 ### 4.2 Leg bet market (per colour)
@@ -118,7 +118,7 @@ No pass, no undo.
 ### 5.1 Track modifier placement legality
 
 - Space must be **empty** of pieces and of any track modifier.
-- **Not** space **1**.
+- **Not** the first space (UI **1** / engine index **0**).
 - **Not adjacent** to a space that already has a track modifier.
 - Player has only one modifier; moving uses the same action.
 
@@ -177,7 +177,7 @@ Each dice token taken this leg: **+1** points.
 
 ## 8. End of the race
 
-- Ends **immediately** when any piece **moves past space 16** (crosses the finish).
+- Ends **immediately** when any piece **moves past the last space** (UI past 16 / engine index greater than 15).
 - First: run a full **leg scoring** round.
 - Then score **overall winner** and **overall loser** race piles:
   - Winner = leading piece (top of stack if tied on space).
@@ -265,7 +265,7 @@ rngCursor: number          # how far the seeded stream has been consumed
 playerCount: 2..8
 activePlayer: 'A'.. 
 phase: 'turn' | 'leg_score' | 'race_score' | 'game_over' | ...
-track: spaces[1..16] → {
+track: spaces[0..15] → {   # UI labels 1..16
   stack: PieceColour[],
   modifier?: { owner, side: 'jump' | 'fall_back' }
 }
@@ -308,7 +308,7 @@ Exact TypeScript types live in `packages/engine` when implemented. Saves after e
 
 ## 13. Open points (non-blocking)
 
-- Exact finish-line tests (first crossing past 16) should freeze edge cases in the engine suite.
+- Exact finish-line tests (first crossing past index 15) should freeze edge cases in the engine suite.
 - Fall-back onto empty space vs under a stack: cover both in engine tests (rules are stated; tests lock them).
 
 Midfield-beside-winner in the leg stacks UI is **required** (see §4.2 / §10.2) — not an open question.
@@ -321,3 +321,4 @@ Midfield-beside-winner in the leg stacks UI is **required** (see §4.2 / §10.2)
 |------|--------|
 | 2026-09-04 | Initial spec from design thread + 2014 quick rules PDF; winner bets 5/3/2/2 + midfield; race payouts 8/5/3/2/1/−1; TS/Vite plan; schizolo UX. |
 | 2026-09-04 | Glossary: leg bet / dice / race bet / track modifier / points. Linear track UI (2 spaces ahead); equal-probability d3; no movement wrap; no chained modifiers; midfield slot required in stacks UI. |
+| 2026-10-20 | Engine track indices are 0–15; UI still labels spaces 1–16. |

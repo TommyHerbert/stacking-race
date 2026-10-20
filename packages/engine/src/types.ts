@@ -60,7 +60,7 @@ export type GameState = {
   activePlayer: PlayerSeat | null;
   startPlayerThisLeg: PlayerSeat | null;
   phase: GamePhase;
-  /** Index 0 unused; spaces 1..16 at indices 1..16. */
+  /** Spaces 0..15 (UI may label these 1..16). */
   track: TrackSpace[];
   /** Piece colours still in the hidden dice pool this leg. */
   dicePool: PieceColour[];
