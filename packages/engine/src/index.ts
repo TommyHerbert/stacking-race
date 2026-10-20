@@ -40,7 +40,6 @@ export {
   initialLegMidfieldBets,
   initialLegWinnerBets,
   mapByColour,
-  spaceIndexFromFace,
   uiSpaceLabel,
 } from './constants.js';
 

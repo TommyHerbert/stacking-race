@@ -82,11 +82,6 @@ export function uiSpaceLabel(index: number): number {
   return index + 1;
 }
 
-/** Engine index for a die face / UI space number (1 → 0). */
-export function spaceIndexFromFace(face: DieFace): number {
-  return face - 1;
-}
-
 /** Fresh per-colour map; `factory` runs once per colour (avoids shared refs). */
 export function mapByColour<T>(factory: () => T): Record<PieceColour, T> {
   return {
