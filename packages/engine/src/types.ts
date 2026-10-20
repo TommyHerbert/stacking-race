@@ -44,7 +44,7 @@ export type PlayerState = {
   /** Dice tokens taken this leg (each worth +1 at leg scoring). */
   diceCount: number;
   raceBetsRemaining: PieceColour[];
-  /** Present when the player's track modifier is not on the board. */
+  /** True if the player's track modifier is not on the board. */
   modifierInHand: boolean;
 };
 
