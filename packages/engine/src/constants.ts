@@ -3,9 +3,8 @@
  * Single source of truth for board size, colours, bet values, and payouts.
  */
 
+/** Number of track spaces (engine indices 0 .. TRACK_SPACE_COUNT - 1). */
 export const TRACK_SPACE_COUNT = 16 as const;
-/** Last legal space index (0-based). Finish = moving past this. */
-export const TRACK_LAST_INDEX = 15 as const;
 
 export const PIECE_COLOURS = [
   'blue',
