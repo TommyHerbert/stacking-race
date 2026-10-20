@@ -86,8 +86,8 @@ Do **not** use: camel, desert, oasis, mirage, pyramid, Egyptian pounds, or other
 
 - **Track:** 16 spaces. **UI labels** are **1–16** left to right; the **engine uses 0-based indices 0–15**. Forward = higher index. Finish = moving **past the last space** (see §8). Movement never wraps.
 - **Five pieces**, five matching dice colours; each roll is **1, 2, or 3 with equal probability**. No need to model a physical six-face die.
-- **Starting positions:** roll all five dice once; place each piece on engine index `face - 1` (so a roll of 1 → UI space 1 / index 0). Same space → stack in **arbitrary order** (engine: shuffle stack order with seeded RNG).
-- Place all five dice into the hidden roll pool. Make **five dice** actions available for the leg (the “dice” stack / supply).
+- **Starting positions:** use the **same draw-then-roll mechanism as gameplay**. With all five dice in the hidden pool, five times: randomly choose which remaining die to reveal, roll its face (1–3 equal), and **immediately place** that colour’s piece on engine index `face - 1` (UI space = face). Landing on an occupied space stacks **on top**. Stack order is therefore arbitrary with no separate shuffle.
+- After setup rolls, return all five dice to the hidden pool. Make **five dice** actions available for the first leg (the “dice” stack / supply).
 
 ### 4.2 Leg bet market (per colour)
 
@@ -322,3 +322,4 @@ Midfield-beside-winner in the leg stacks UI is **required** (see §4.2 / §10.2)
 | 2026-09-04 | Initial spec from design thread + 2014 quick rules PDF; winner bets 5/3/2/2 + midfield; race payouts 8/5/3/2/1/−1; TS/Vite plan; schizolo UX. |
 | 2026-09-04 | Glossary: leg bet / dice / race bet / track modifier / points. Linear track UI (2 spaces ahead); equal-probability d3; no movement wrap; no chained modifiers; midfield slot required in stacks UI. |
 | 2026-10-20 | Engine track indices are 0–15; UI still labels spaces 1–16. |
+| 2026-10-20 | Setup places pieces via the same draw-then-roll-and-place loop as play; no stack reshuffle. |
