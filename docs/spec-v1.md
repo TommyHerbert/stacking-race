@@ -1,8 +1,6 @@
 # Stacking Race — Spec v1
 
-Abstract, offline, schizolo (hotseat) race-betting game for web first (phone portrait), later Android/iOS. Mechanics match **Camel Up (2014 base game)** as corrected below; theme and naming are original. No camel-related terminology in UI, history, or code identifiers exposed to players.
-
-**Rules sources (precedence):** this spec → player clarifications → `docs/Camel_Up_Quick_Rules.pdf` (BGG “freechinanow”, Dec 2016). Where this spec disagrees with the PDF (notably leg bet counts and midfield bets), **this spec wins**.
+Abstract, offline, schizolo (hotseat) race-betting game for web first (phone portrait), later Android/iOS.
 
 ---
 
