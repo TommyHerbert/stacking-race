@@ -3,12 +3,10 @@
  * No rules logic here — shape only.
  */
 
+import type { PieceColour, PlayerSeat, WinnerBetValue } from './constants.js';
 import { ENGINE_VERSION } from './version.js';
 
-export type PlayerSeat = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
-
-/** Five racing piece colours (abstract; not theme-flavoured). */
-export type PieceColour = 'blue' | 'green' | 'orange' | 'yellow' | 'white';
+export type { PieceColour, PlayerSeat, WinnerBetValue };
 
 export type TrackModifierSide = 'jump' | 'fall_back';
 
@@ -18,8 +16,6 @@ export type GamePhase =
   | 'leg_score'
   | 'race_score'
   | 'game_over';
-
-export type WinnerBetValue = 5 | 3 | 2;
 
 export type LegBet =
   | { kind: 'winner'; colour: PieceColour; value: WinnerBetValue }
@@ -60,7 +56,7 @@ export type GameState = {
   activePlayer: PlayerSeat | null;
   startPlayerThisLeg: PlayerSeat | null;
   phase: GamePhase;
-  /** Spaces 0..15 (UI may label these 1..16). */
+  /** Spaces 0..TRACK_LAST_INDEX (UI may label these 1..TRACK_SPACE_COUNT). */
   track: TrackSpace[];
   /** Piece colours still in the hidden dice pool this leg. */
   dicePool: PieceColour[];
@@ -70,7 +66,7 @@ export type GameState = {
   legWinnerBets: Record<PieceColour, WinnerBetValue[]>;
   /** Per colour, whether the midfield bet is still available. */
   legMidfieldBets: Record<PieceColour, boolean>;
-  /** Take-dice supply remaining this leg (0..5). */
+  /** Take-dice supply remaining this leg (0..DICE_PER_LEG). */
   diceRemaining: number;
   players: PlayerState[];
   raceWinnerPile: RaceBetPileEntry[];

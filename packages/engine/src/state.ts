@@ -1,42 +1,12 @@
-import type {
-  GameState,
-  PieceColour,
-  TrackSpace,
-  WinnerBetValue,
-} from './types.js';
+import {
+  TRACK_SPACE_COUNT,
+  mapByColour,
+} from './constants.js';
+import type { GameState, TrackSpace } from './types.js';
 import { ENGINE_VERSION } from './version.js';
-const TRACK_SPACE_COUNT = 16;
-
-const PIECE_COLOURS = [
-  'blue',
-  'green',
-  'orange',
-  'yellow',
-  'white',
-] as const satisfies readonly PieceColour[];
 
 function emptyTrack(): TrackSpace[] {
   return Array.from({ length: TRACK_SPACE_COUNT }, () => ({ stack: [] }));
-}
-
-function emptyLegWinnerBets(): Record<PieceColour, WinnerBetValue[]> {
-  return {
-    blue: [],
-    green: [],
-    orange: [],
-    yellow: [],
-    white: [],
-  };
-}
-
-function emptyLegMidfieldBets(): Record<PieceColour, boolean> {
-  return {
-    blue: false,
-    green: false,
-    orange: false,
-    yellow: false,
-    white: false,
-  };
 }
 
 /**
@@ -55,8 +25,8 @@ export function createEmptyGameState(rngSeed: number): GameState {
     track: emptyTrack(),
     dicePool: [],
     diceUsed: [],
-    legWinnerBets: emptyLegWinnerBets(),
-    legMidfieldBets: emptyLegMidfieldBets(),
+    legWinnerBets: mapByColour(() => []),
+    legMidfieldBets: mapByColour(() => false),
     diceRemaining: 0,
     players: [],
     raceWinnerPile: [],
@@ -64,7 +34,3 @@ export function createEmptyGameState(rngSeed: number): GameState {
     history: [],
   };
 }
-
-/** Exported for tests / upcoming constants commit; not player-facing. */
-export const EMPTY_STATE_TRACK_SPACE_COUNT = TRACK_SPACE_COUNT;
-export const EMPTY_STATE_PIECE_COLOURS = PIECE_COLOURS;
