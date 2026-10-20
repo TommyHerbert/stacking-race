@@ -75,7 +75,7 @@ export const LEG_MIDFIELD_PAYOUT_BY_RANK = {
 export const LEG_DICE_TOKEN_PAYOUT = 1 as const;
 
 /** Points awarded to a track-modifier owner when it is triggered. */
-export const TRACK_MODIFIER_TRIGGER_PAYOUT = 1 as const;
+export const MODIFIER_PAYOUT = 1 as const;
 
 /** UI label for an engine space index (0 → "1"). */
 export function uiSpaceLabel(index: number): number {
