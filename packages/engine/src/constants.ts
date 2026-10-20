@@ -50,7 +50,7 @@ export type DieFace = (typeof DIE_FACES)[number];
 /** Race-bet payouts for correct cards, in place order (first placed first). */
 export const RACE_BET_CORRECT_PAYOUTS = [8, 5, 3, 2, 1] as const;
 
-/** Points lost for an incorrect race bet (floored at 0 when applied). */
+/** Points lost for an incorrect race bet. */
 export const RACE_BET_WRONG_PENALTY = 1 as const;
 
 /** Winner-bet payout when the colour places 2nd. */
