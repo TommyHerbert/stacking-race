@@ -84,7 +84,6 @@ export function createGame(options: CreateGameOptions): GameState {
   const state = createEmptyGameState(options.rngSeed);
   let rng = createRng(options.rngSeed);
 
-  state.playerCount = options.playerCount;
   state.players = createPlayers(options.playerCount);
   state.activePlayer = 'A';
   state.startPlayerThisLeg = 'A';

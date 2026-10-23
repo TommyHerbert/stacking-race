@@ -18,7 +18,6 @@ export function createEmptyGameState(rngSeed: number): GameState {
     version: ENGINE_VERSION,
     rngSeed: rngSeed >>> 0,
     rngCursor: 0,
-    playerCount: 0,
     activePlayer: null,
     startPlayerThisLeg: null,
     phase: 'empty',
