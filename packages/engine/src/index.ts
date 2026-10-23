@@ -1,6 +1,6 @@
 /**
  * Pure rules engine for Stacking Race.
- * No UI dependencies. Rules/setup land in later commits.
+ * No UI dependencies.
  */
 
 export { ENGINE_VERSION } from './version.js';
@@ -30,12 +30,12 @@ export {
   LEG_WINNER_SECOND_PAYOUT,
   MAX_PLAYERS,
   MIN_PLAYERS,
+  MODIFIER_PAYOUT,
   PIECE_COLOURS,
   PLAYER_SEATS,
   RACE_BET_CORRECT_PAYOUTS,
   RACE_BET_WRONG_PENALTY,
   STARTING_POINTS,
-  MODIFIER_PAYOUT,
   TRACK_SPACE_COUNT,
   initialLegMidfieldBets,
   initialLegWinnerBets,
@@ -55,3 +55,8 @@ export {
 } from './rng.js';
 
 export { createEmptyGameState } from './state.js';
+
+export type { CreateGameOptions } from './setup.js';
+export { createGame } from './setup.js';
+
+export { GameStateParseError, deserializeGameState, serializeGameState } from './serialize.js';
