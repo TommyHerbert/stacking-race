@@ -60,3 +60,6 @@ export type { CreateGameOptions } from './setup.js';
 export { createGame } from './setup.js';
 
 export { GameStateParseError, deserializeGameState, serializeGameState } from './serialize.js';
+
+export type { Action } from './actions.js';
+export { IllegalActionError, apply, legalActions } from './actions.js';
