@@ -36,21 +36,19 @@ function assertGameStateShape(value: unknown): asserts value is GameState {
   }
 
   if (
-    !Number.isInteger(state.playerCount) ||
-    state.playerCount < MIN_PLAYERS ||
-    state.playerCount > MAX_PLAYERS
+    !Array.isArray(state.players) ||
+    state.players.length < MIN_PLAYERS ||
+    state.players.length > MAX_PLAYERS
   ) {
-    throw new GameStateParseError('Invalid playerCount');
+    throw new GameStateParseError(
+      `players length must be from ${MIN_PLAYERS} to ${MAX_PLAYERS}`,
+    );
   }
 
   if (!Array.isArray(state.track) || state.track.length !== TRACK_SPACE_COUNT) {
     throw new GameStateParseError(
       `Track must have ${TRACK_SPACE_COUNT} spaces`,
     );
-  }
-
-  if (!Array.isArray(state.players) || state.players.length !== state.playerCount) {
-    throw new GameStateParseError('players length must match playerCount');
   }
 
   if (!Array.isArray(state.dicePool) || !state.dicePool.every(isPieceColour)) {

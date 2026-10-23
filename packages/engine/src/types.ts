@@ -52,7 +52,6 @@ export type GameState = {
   version: typeof ENGINE_VERSION;
   rngSeed: number;
   rngCursor: number;
-  playerCount: number;
   activePlayer: PlayerSeat | null;
   startPlayerThisLeg: PlayerSeat | null;
   phase: GamePhase;

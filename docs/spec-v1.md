@@ -260,7 +260,6 @@ Logical contents:
 version: 1
 rngSeed: string | number
 rngCursor: number          # how far the seeded stream has been consumed
-playerCount: 2..8
 activePlayer: 'A'.. 
 phase: 'turn' | 'leg_score' | 'race_score' | 'game_over' | ...
 track: spaces[0..15] → {   # UI labels 1..16
@@ -272,7 +271,7 @@ diceUsed: revealed this leg
 legWinnerBets: per colour → remaining values top-first
 legMidfieldBets: per colour → available bool
 diceRemaining: 0..5       # take-dice supply this leg
-players: per seat → {
+players: [2..8] per seat → {   # length is the player count
   points,
   legBets[],
   diceCount,
@@ -322,3 +321,4 @@ Midfield-beside-winner in the leg stacks UI is **required** (see §4.2 / §10.2)
 | 2026-10-20 | Engine track indices are 0–15; UI still labels spaces 1–16. |
 | 2026-10-20 | Setup places pieces via the same draw-then-roll-and-place loop as play; no stack reshuffle. |
 | 2026-10-20 | Setup models pieces as starting at index −1; movement is just position + face (same as in-game). |
+| 2026-10-23 | Drop explicit playerCount from GameState; use players.length. |
