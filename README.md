@@ -17,6 +17,7 @@ But when I ran it, I found I had to add `~/.local/share/pnpm` to the path and th
 ```bash
 pnpm install
 pnpm typecheck
+pnpm test
 pnpm dev
 ```
 
