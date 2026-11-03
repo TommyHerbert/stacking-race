@@ -42,7 +42,7 @@ export function LegView({ game, legal, onAction }: LegViewProps) {
                 </span>
               ))}
             {active?.modifierInHand && (
-              <span class="chip static">tile</span>
+              <span class="chip static">track modifier</span>
             )}
             {active != null &&
               active.legBets.length === 0 &&
@@ -66,14 +66,44 @@ export function LegView({ game, legal, onAction }: LegViewProps) {
                 onAction={onAction}
               />
             ))}
+          </div>
+          <div class="dice-status">
             <button
               type="button"
               class="chip action dice"
               disabled={!isLegal(legal, { type: 'take_dice' })}
               onClick={() => onAction({ type: 'take_dice' })}
             >
-              dice×{game.diceRemaining}
+              Take dice
             </button>
+            <div class="dice-pool" title="Still in the pool this leg">
+              <span class="dice-pool-label">left</span>
+              {game.dicePool.length === 0 ? (
+                <span class="zone-empty">—</span>
+              ) : (
+                game.dicePool.map((colour, index) => (
+                  <div
+                    key={`pool-${colour}-${index}`}
+                    class={PIECE_CLASS[colour]}
+                    title={colour}
+                  />
+                ))
+              )}
+            </div>
+            <div class="dice-pool used" title="Already rolled this leg">
+              <span class="dice-pool-label">out</span>
+              {game.diceUsed.length === 0 ? (
+                <span class="zone-empty">—</span>
+              ) : (
+                game.diceUsed.map((colour, index) => (
+                  <div
+                    key={`used-${colour}-${index}`}
+                    class={`${PIECE_CLASS[colour]} used`}
+                    title={colour}
+                  />
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

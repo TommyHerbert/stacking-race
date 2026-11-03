@@ -109,8 +109,8 @@ body {
 
 .menu-button {
   font: inherit;
-  font-size: 1rem;
-  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
+  padding: 1rem 1.1rem;
   border: 1px solid var(--frame);
   background: #1a1a1a;
   color: var(--ink);
@@ -187,8 +187,8 @@ body {
 
 .top-button {
   font: inherit;
-  font-size: 0.7rem;
-  padding: 0.55rem 0.2rem;
+  font-size: 0.8rem;
+  padding: 0.7rem 0.25rem;
   border: 1px solid var(--frame);
   background: #1a1a1a;
   color: var(--ink);
@@ -325,8 +325,8 @@ body {
 
 .chip {
   font: inherit;
-  font-size: 0.7rem;
-  padding: 0.25rem 0.35rem;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.55rem;
   border: 1px solid var(--frame);
   background: #1a1a1a;
   color: var(--ink);
@@ -347,7 +347,7 @@ body {
 }
 
 .chip.dice {
-  min-width: 1.4rem;
+  min-width: 2.5rem;
   text-align: center;
 }
 
@@ -355,13 +355,48 @@ body {
 .race-bet {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.3rem;
 }
 
 .colour-market .piece,
 .race-bet .piece {
-  width: 0.7rem;
-  height: 0.7rem;
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.dice-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #1f1f1f;
+}
+
+.dice-pool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dice-pool-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  margin-right: 0.15rem;
+}
+
+.dice-pool .piece {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.dice-pool.used .piece,
+.piece.used {
+  opacity: 0.4;
+  outline: 1px dashed var(--ink-muted);
 }
 
 /* track */

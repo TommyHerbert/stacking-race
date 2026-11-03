@@ -154,8 +154,10 @@ function OpponentsPanel({ game }: { game: GameState }) {
             )
             .join(' ');
           const race = player.raceBetsRemaining.map(shortColour).join('');
-          const tile = player.modifierInHand ? 'tile' : 'tile@board';
-          return `${player.seat}:${player.points}p dice${player.diceCount} [${bets || '—'}] race(${race || '—'}) ${tile}`;
+          const modifier = player.modifierInHand
+            ? 'modifier:hand'
+            : 'modifier:board';
+          return `${player.seat}:${player.points}p dice${player.diceCount} [${bets || '—'}] race(${race || '—'}) ${modifier}`;
         })
         .join('\n')}
       {'\n'}
@@ -177,8 +179,10 @@ function OpponentsPanel({ game }: { game: GameState }) {
         .filter(Boolean)
         .join('')}
       {'\n'}
-      W×{game.raceWinnerPile.length} L×{game.raceLoserPile.length} dice×
-      {game.diceRemaining}
+      W×{game.raceWinnerPile.length} L×{game.raceLoserPile.length}
+      {'\n'}
+      dice left:{game.dicePool.map(shortColour).join('') || '—'} out:
+      {game.diceUsed.map(shortColour).join('') || '—'}
     </pre>
   );
 }
