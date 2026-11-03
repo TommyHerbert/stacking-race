@@ -280,6 +280,7 @@ players: [2..8] per seat → {   # length is the player count
 }
 raceWinnerPile: { player, colour }[]   # place order; UI hides colours
 raceLoserPile:  { player, colour }[]
+crossedFinish: PieceColour[]           # lead-first among pieces past the finish
 history: string[] | structured events
 startPlayerThisLeg: seat
 ```

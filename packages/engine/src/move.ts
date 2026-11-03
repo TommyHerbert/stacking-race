@@ -59,8 +59,12 @@ export function movePieceForward(
   const source = next.track[from]!;
   const moving = source.stack.splice(stackIndex);
 
+  /** Lead-first among the moving unit (top of stack first). */
+  const crossedLeadFirst = [...moving].reverse();
+
   let destination = from + steps;
   if (destination >= TRACK_SPACE_COUNT) {
+    next.crossedFinish = [...crossedLeadFirst, ...next.crossedFinish];
     return {
       state: next,
       finished: true,
@@ -76,6 +80,7 @@ export function movePieceForward(
     grantModifierPayout(next, modifier.owner);
     destination += 1;
     if (destination >= TRACK_SPACE_COUNT) {
+      next.crossedFinish = [...crossedLeadFirst, ...next.crossedFinish];
       return {
         state: next,
         finished: true,

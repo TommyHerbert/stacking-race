@@ -81,12 +81,14 @@ describe('movePieceForward', () => {
 
   it('marks finished when movement passes the last space', () => {
     const state = boardWith((draft) => {
-      draft.track[14]!.stack = ['blue'];
+      draft.track[14]!.stack = ['yellow', 'blue', 'white'];
     });
 
     const result = movePieceForward(state, 'blue', 3);
     expect(result.finished).toBe(true);
     expect(result.destination).toBeNull();
-    expect(result.state.track[14]!.stack).toEqual([]);
+    expect(result.state.track[14]!.stack).toEqual(['yellow']);
+    // Lead-first among the finishing unit: top of stack first.
+    expect(result.state.crossedFinish).toEqual(['white', 'blue']);
   });
 });

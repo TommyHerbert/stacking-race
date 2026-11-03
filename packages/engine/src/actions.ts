@@ -11,6 +11,7 @@ import {
   nextInt,
   rngFromGame,
 } from './rng.js';
+import { resolveLegEnd, resolveRaceEnd } from './score.js';
 import type { GameState, TrackModifierSide } from './types.js';
 
 /**
@@ -288,14 +289,11 @@ function applyTakeDice(state: GameState): GameState {
   );
 
   if (moved.finished) {
-    // Scoring arrives in a later commit; freeze turns until then.
-    next.phase = 'race_score';
-    return next;
+    return resolveRaceEnd(next);
   }
 
   if (next.diceRemaining === 0) {
-    next.phase = 'leg_score';
-    return next;
+    return resolveLegEnd(next);
   }
 
   next.activePlayer = nextPlayer(next);
