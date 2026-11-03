@@ -7,7 +7,6 @@ import {
   type GameState,
 } from '@stacking-race/engine';
 import {
-  clearContinueGame,
   hasContinueGame,
   loadContinueGame,
   saveContinueGame,
@@ -54,12 +53,6 @@ export function App() {
     refreshContinue();
   }
 
-  function abandonAndMenu() {
-    clearContinueGame();
-    setCanContinue(false);
-    backToMenu();
-  }
-
   return (
     <div class="device-frame">
       <main class="phone-shell">
@@ -75,7 +68,6 @@ export function App() {
           <GameScreen
             game={game}
             onBackToMenu={backToMenu}
-            onAbandon={abandonAndMenu}
           />
         ) : (
           <div class="game-placeholder">

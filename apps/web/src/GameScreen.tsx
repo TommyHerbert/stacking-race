@@ -6,7 +6,6 @@ type Panel = 'none' | 'score' | 'opponents' | 'history' | 'options';
 type GameScreenProps = {
   game: GameState;
   onBackToMenu: () => void;
-  onAbandon: () => void;
 };
 
 /**
@@ -15,7 +14,6 @@ type GameScreenProps = {
 export function GameScreen({
   game,
   onBackToMenu,
-  onAbandon,
 }: GameScreenProps) {
   const [panel, setPanel] = useState<Panel>('none');
 
@@ -82,13 +80,6 @@ export function GameScreen({
                 onClick={onBackToMenu}
               >
                 Back to menu
-              </button>
-              <button
-                type="button"
-                class="menu-button danger"
-                onClick={onAbandon}
-              >
-                Abandon save
               </button>
             </div>
           )}
