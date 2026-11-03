@@ -12,6 +12,7 @@ import {
   loadContinueGame,
   saveContinueGame,
 } from './continueSlot';
+import { GameScreen } from './GameScreen';
 
 type Screen = 'menu' | 'game';
 
@@ -19,9 +20,6 @@ function newRngSeed(): number {
   return (Math.random() * 0x1_0000_0000) >>> 0;
 }
 
-/**
- * Menu + a minimal in-game placeholder (full chrome arrives next).
- */
 export function App() {
   const [screen, setScreen] = useState<Screen>('menu');
   const [playerCount, setPlayerCount] = useState(4);
@@ -73,12 +71,19 @@ export function App() {
             onNewGame={startNewGame}
             onContinue={continueGame}
           />
-        ) : (
-          <GamePlaceholder
+        ) : game != null ? (
+          <GameScreen
             game={game}
-            onBack={backToMenu}
+            onBackToMenu={backToMenu}
             onAbandon={abandonAndMenu}
           />
+        ) : (
+          <div class="game-placeholder">
+            <p class="placeholder">No game loaded.</p>
+            <button type="button" class="menu-button" onClick={backToMenu}>
+              Back to menu
+            </button>
+          </div>
         )}
         <p class="meta">engine v{ENGINE_VERSION}</p>
       </main>
@@ -139,50 +144,6 @@ function MenuScreen({
           disabled={!canContinue}
         >
           Continue
-        </button>
-      </div>
-    </div>
-  );
-}
-
-type GamePlaceholderProps = {
-  game: GameState | null;
-  onBack: () => void;
-  onAbandon: () => void;
-};
-
-function GamePlaceholder({ game, onBack, onAbandon }: GamePlaceholderProps) {
-  if (game == null) {
-    return (
-      <div class="game-placeholder">
-        <p class="placeholder">No game loaded.</p>
-        <button type="button" class="menu-button" onClick={onBack}>
-          Back to menu
-        </button>
-      </div>
-    );
-  }
-
-  const status =
-    game.phase === 'game_over'
-      ? 'Game over'
-      : game.activePlayer != null
-        ? `Player ${game.activePlayer}'s turn`
-        : 'Game in progress';
-
-  return (
-    <div class="game-placeholder">
-      <h1 class="brand">Stacking Race</h1>
-      <p class="game-status">{status}</p>
-      <p class="placeholder">
-        {game.players.length} players · game UI chrome comes next.
-      </p>
-      <div class="menu-actions">
-        <button type="button" class="menu-button" onClick={onBack}>
-          Back to menu
-        </button>
-        <button type="button" class="menu-button danger" onClick={onAbandon}>
-          Abandon save
         </button>
       </div>
     </div>
