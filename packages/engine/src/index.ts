@@ -63,3 +63,6 @@ export { GameStateParseError, deserializeGameState, serializeGameState } from '.
 
 export type { Action } from './actions.js';
 export { IllegalActionError, apply, legalActions } from './actions.js';
+
+export type { MoveResult } from './move.js';
+export { movePieceForward } from './move.js';

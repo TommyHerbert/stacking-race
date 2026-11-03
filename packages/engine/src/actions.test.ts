@@ -11,7 +11,6 @@ import {
 describe('legalActions / apply (unimplemented families)', () => {
   it('rejects action families that are not implemented yet', () => {
     const state = createGame({ playerCount: 2, rngSeed: 1 });
-    expect(() => apply(state, { type: 'take_dice' })).toThrow(IllegalActionError);
     expect(() =>
       apply(state, {
         type: 'place_race_bet',
@@ -196,5 +195,40 @@ describe('place modifier', () => {
     expect(afterRelocate.history.at(-1)).toBe(
       'Player A moved jump modifier on space 9.',
     );
+  });
+});
+
+describe('take dice', () => {
+  it('is legal while dice remain and is deterministic for a fixed seed', () => {
+    const a = createGame({ playerCount: 2, rngSeed: 7 });
+    const b = createGame({ playerCount: 2, rngSeed: 7 });
+
+    expect(legalActions(a)).toContainEqual({ type: 'take_dice' });
+
+    const afterA = apply(a, { type: 'take_dice' });
+    const afterB = apply(b, { type: 'take_dice' });
+
+    expect(afterA.track).toEqual(afterB.track);
+    expect(afterA.dicePool).toEqual(afterB.dicePool);
+    expect(afterA.diceUsed).toEqual(afterB.diceUsed);
+    expect(afterA.rngCursor).toBe(afterB.rngCursor);
+    expect(afterA.players[0]?.diceCount).toBe(1);
+    expect(afterA.diceRemaining).toBe(4);
+    expect(afterA.activePlayer).toBe('B');
+  });
+
+  it('enters leg_score after the fifth dice of the leg', () => {
+    let state = createGame({ playerCount: 2, rngSeed: 3 });
+    for (let i = 0; i < 4; i += 1) {
+      state = apply(state, { type: 'take_dice' });
+      expect(state.phase).toBe('turn');
+    }
+
+    state = apply(state, { type: 'take_dice' });
+    expect(state.phase).toBe('leg_score');
+    expect(state.diceRemaining).toBe(0);
+    expect(state.dicePool).toEqual([]);
+    expect(state.diceUsed).toHaveLength(5);
+    expect(legalActions(state)).toEqual([]);
   });
 });

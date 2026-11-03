@@ -5,11 +5,17 @@ import {
   type PieceColour,
   type PlayerSeat,
 } from './constants.js';
+import { movePieceForward } from './move.js';
+import {
+  nextDieFace,
+  nextInt,
+  rngFromGame,
+} from './rng.js';
 import type { GameState, TrackModifierSide } from './types.js';
 
 /**
  * Player-chosen turn actions.
- * Implemented: take leg bets, place/move track modifier.
+ * Implemented: leg bets, track modifiers, take dice.
  */
 export type Action =
   | { type: 'take_winner_bet'; colour: PieceColour }
@@ -143,6 +149,13 @@ function legalModifierActions(state: GameState): Action[] {
   return actions;
 }
 
+function legalDiceActions(state: GameState): Action[] {
+  if (state.diceRemaining <= 0 || state.dicePool.length === 0) {
+    return [];
+  }
+  return [{ type: 'take_dice' }];
+}
+
 /**
  * Legal actions for the active player in the current phase.
  */
@@ -151,7 +164,11 @@ export function legalActions(state: GameState): Action[] {
     return [];
   }
 
-  return [...legalLegBetActions(state), ...legalModifierActions(state)];
+  return [
+    ...legalLegBetActions(state),
+    ...legalModifierActions(state),
+    ...legalDiceActions(state),
+  ];
 }
 
 function applyTakeWinnerBet(
@@ -224,6 +241,50 @@ function applyPlaceModifier(
   return next;
 }
 
+function applyTakeDice(state: GameState): GameState {
+  if (state.diceRemaining <= 0 || state.dicePool.length === 0) {
+    throw new IllegalActionError('No dice remaining this leg');
+  }
+
+  let next = cloneState(state);
+  const player = activePlayerState(next);
+
+  let rng = rngFromGame(next.rngSeed, next.rngCursor);
+  const pick = nextInt(rng, next.dicePool.length);
+  rng = pick.rng;
+  const colour = next.dicePool[pick.value]!;
+  next.dicePool = next.dicePool.filter((_, index) => index !== pick.value);
+
+  const roll = nextDieFace(rng);
+  rng = roll.rng;
+  next.rngCursor = rng.cursor;
+
+  player.diceCount += 1;
+  next.diceRemaining -= 1;
+  next.diceUsed.push(colour);
+
+  const moved = movePieceForward(next, colour, roll.value);
+  next = moved.state;
+
+  next.history.push(
+    `Player ${player.seat} took dice: ${moved.summary} (rolled ${roll.value}).`,
+  );
+
+  if (moved.finished) {
+    // Scoring arrives in a later commit; freeze turns until then.
+    next.phase = 'race_score';
+    return next;
+  }
+
+  if (next.diceRemaining === 0) {
+    next.phase = 'leg_score';
+    return next;
+  }
+
+  next.activePlayer = nextPlayer(next);
+  return next;
+}
+
 /**
  * Apply one legal action, returning a new state.
  */
@@ -242,6 +303,8 @@ export function apply(state: GameState, action: Action): GameState {
       return applyTakeMidfieldBet(state, action.colour);
     case 'place_modifier':
       return applyPlaceModifier(state, action.space, action.side);
+    case 'take_dice':
+      return applyTakeDice(state);
     default:
       throw new IllegalActionError(`Unhandled action: ${action.type}`);
   }
