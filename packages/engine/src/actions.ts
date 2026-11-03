@@ -15,7 +15,7 @@ import type { GameState, TrackModifierSide } from './types.js';
 
 /**
  * Player-chosen turn actions.
- * Implemented: leg bets, track modifiers, take dice.
+ * Implemented: leg bets, track modifiers, take dice, race bets.
  */
 export type Action =
   | { type: 'take_winner_bet'; colour: PieceColour }
@@ -156,6 +156,22 @@ function legalDiceActions(state: GameState): Action[] {
   return [{ type: 'take_dice' }];
 }
 
+function legalRaceBetActions(state: GameState): Action[] {
+  const player = state.players.find(
+    (entry) => entry.seat === state.activePlayer,
+  );
+  if (player == null) {
+    return [];
+  }
+
+  const actions: Action[] = [];
+  for (const colour of player.raceBetsRemaining) {
+    actions.push({ type: 'place_race_bet', colour, target: 'winner' });
+    actions.push({ type: 'place_race_bet', colour, target: 'loser' });
+  }
+  return actions;
+}
+
 /**
  * Legal actions for the active player in the current phase.
  */
@@ -168,6 +184,7 @@ export function legalActions(state: GameState): Action[] {
     ...legalLegBetActions(state),
     ...legalModifierActions(state),
     ...legalDiceActions(state),
+    ...legalRaceBetActions(state),
   ];
 }
 
@@ -285,6 +302,33 @@ function applyTakeDice(state: GameState): GameState {
   return next;
 }
 
+function applyPlaceRaceBet(
+  state: GameState,
+  colour: PieceColour,
+  target: 'winner' | 'loser',
+): GameState {
+  const next = cloneState(state);
+  const player = activePlayerState(next);
+  const heldIndex = player.raceBetsRemaining.indexOf(colour);
+  if (heldIndex < 0) {
+    throw new IllegalActionError(`Player ${player.seat} has no ${colour} race bet`);
+  }
+
+  player.raceBetsRemaining.splice(heldIndex, 1);
+  const entry = { player: player.seat, colour };
+  if (target === 'winner') {
+    next.raceWinnerPile.push(entry);
+  } else {
+    next.raceLoserPile.push(entry);
+  }
+
+  next.history.push(
+    `Player ${player.seat} placed ${colour} race bet on overall ${target}.`,
+  );
+  next.activePlayer = nextPlayer(next);
+  return next;
+}
+
 /**
  * Apply one legal action, returning a new state.
  */
@@ -305,7 +349,13 @@ export function apply(state: GameState, action: Action): GameState {
       return applyPlaceModifier(state, action.space, action.side);
     case 'take_dice':
       return applyTakeDice(state);
-    default:
-      throw new IllegalActionError(`Unhandled action: ${action.type}`);
+    case 'place_race_bet':
+      return applyPlaceRaceBet(state, action.colour, action.target);
+    default: {
+      const _exhaustive: never = action;
+      throw new IllegalActionError(
+        `Unhandled action: ${(_exhaustive as Action).type}`,
+      );
+    }
   }
 }
