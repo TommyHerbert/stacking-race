@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   IllegalActionError,
   PIECE_COLOURS,
+  TRACK_SPACE_COUNT,
   apply,
   createGame,
   legalActions,
@@ -13,9 +14,9 @@ describe('legalActions / apply (unimplemented families)', () => {
     expect(() => apply(state, { type: 'take_dice' })).toThrow(IllegalActionError);
     expect(() =>
       apply(state, {
-        type: 'place_modifier',
-        space: 2,
-        side: 'jump',
+        type: 'place_race_bet',
+        colour: 'blue',
+        target: 'winner',
       }),
     ).toThrow(IllegalActionError);
   });
@@ -24,9 +25,12 @@ describe('legalActions / apply (unimplemented families)', () => {
 describe('take leg bet', () => {
   it('lists all available winner and midfield bets at leg start', () => {
     const state = createGame({ playerCount: 2, rngSeed: 1 });
-    const legal = legalActions(state);
+    const legBets = legalActions(state).filter(
+      (action) =>
+        action.type === 'take_winner_bet' || action.type === 'take_midfield_bet',
+    );
 
-    expect(legal).toEqual(
+    expect(legBets).toEqual(
       PIECE_COLOURS.flatMap((colour) => [
         { type: 'take_winner_bet', colour },
         { type: 'take_midfield_bet', colour },
@@ -67,5 +71,130 @@ describe('take leg bet', () => {
     expect(() =>
       apply(afterA, { type: 'take_midfield_bet', colour: 'green' }),
     ).toThrow(IllegalActionError);
+  });
+});
+
+describe('place modifier', () => {
+  it('allows jump/fall back on empty non-first spaces that are free of adjacency', () => {
+    const state = createGame({ playerCount: 2, rngSeed: 1 });
+    const modifierActions = legalActions(state).filter(
+      (action) => action.type === 'place_modifier',
+    );
+
+    expect(modifierActions.length).toBeGreaterThan(0);
+    expect(
+      modifierActions.every(
+        (action) =>
+          action.type === 'place_modifier' &&
+          action.space >= 1 &&
+          action.space < TRACK_SPACE_COUNT,
+      ),
+    ).toBe(true);
+
+    // Space 0 is never legal.
+    expect(modifierActions).not.toContainEqual({
+      type: 'place_modifier',
+      space: 0,
+      side: 'jump',
+    });
+
+    // Occupied spaces from setup are illegal.
+    for (let space = 0; space < TRACK_SPACE_COUNT; space += 1) {
+      if (state.track[space]!.stack.length === 0) {
+        continue;
+      }
+      expect(modifierActions).not.toContainEqual({
+        type: 'place_modifier',
+        space,
+        side: 'jump',
+      });
+    }
+  });
+
+  it('places a modifier from hand and advances the turn', () => {
+    const state = createGame({ playerCount: 2, rngSeed: 1 });
+    const target = legalActions(state).find(
+      (action) => action.type === 'place_modifier' && action.side === 'jump',
+    );
+    expect(target?.type).toBe('place_modifier');
+    if (target?.type !== 'place_modifier') {
+      throw new Error('expected a place_modifier action');
+    }
+
+    const next = apply(state, target);
+    expect(next.track[target.space]?.modifier).toEqual({
+      owner: 'A',
+      side: 'jump',
+    });
+    expect(next.players[0]?.modifierInHand).toBe(false);
+    expect(next.activePlayer).toBe('B');
+    expect(next.history.at(-1)).toBe(
+      `Player A placed jump modifier on space ${target.space + 1}.`,
+    );
+  });
+
+  it('relocates an existing modifier and blocks adjacent spaces for others', () => {
+    const state = createGame({ playerCount: 2, rngSeed: 1 });
+    const first = legalActions(state).find(
+      (action) =>
+        action.type === 'place_modifier' &&
+        action.space === 5 &&
+        action.side === 'fall_back',
+    );
+    expect(first).toEqual({
+      type: 'place_modifier',
+      space: 5,
+      side: 'fall_back',
+    });
+
+    const afterA = apply(state, first!);
+    expect(afterA.track[5]?.modifier).toEqual({
+      owner: 'A',
+      side: 'fall_back',
+    });
+
+    const legalForB = legalActions(afterA).filter(
+      (action) => action.type === 'place_modifier',
+    );
+    expect(legalForB).not.toContainEqual({
+      type: 'place_modifier',
+      space: 4,
+      side: 'jump',
+    });
+    expect(legalForB).not.toContainEqual({
+      type: 'place_modifier',
+      space: 5,
+      side: 'jump',
+    });
+    expect(legalForB).not.toContainEqual({
+      type: 'place_modifier',
+      space: 6,
+      side: 'jump',
+    });
+
+    // Player B places elsewhere, then on A's next turn relocating is allowed.
+    const bPlace = legalForB.find(
+      (action) => action.type === 'place_modifier' && action.space === 10,
+    );
+    expect(bPlace).toBeTruthy();
+    const afterB = apply(afterA, bPlace!);
+
+    const relocate = legalActions(afterB).find(
+      (action) =>
+        action.type === 'place_modifier' &&
+        action.space === 8 &&
+        action.side === 'jump',
+    );
+    expect(relocate).toBeTruthy();
+    const afterRelocate = apply(afterB, relocate!);
+
+    expect(afterRelocate.track[5]?.modifier).toBeUndefined();
+    expect(afterRelocate.track[8]?.modifier).toEqual({
+      owner: 'A',
+      side: 'jump',
+    });
+    expect(afterRelocate.history.at(-1)).toBe(
+      'Player A moved jump modifier on space 9.',
+    );
   });
 });
