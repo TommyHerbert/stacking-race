@@ -222,7 +222,7 @@ body {
 }
 
 .zone {
-  border: 1px dashed var(--frame);
+  border: 1px solid var(--frame);
   padding: 0.55rem 0.65rem;
   display: flex;
   flex-direction: column;
@@ -278,4 +278,184 @@ body {
   flex-direction: column;
   gap: 0.35rem;
   min-height: 3.5rem;
+}
+
+.turn-points {
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+/* pieces / chips */
+
+.piece {
+  width: 0.85rem;
+  height: 0.55rem;
+  border: 1px solid #000;
+  flex-shrink: 0;
+}
+
+.piece-blue {
+  background: #3b82f6;
+}
+
+.piece-green {
+  background: #22c55e;
+}
+
+.piece-orange {
+  background: #f97316;
+}
+
+.piece-yellow {
+  background: #eab308;
+}
+
+.piece-white {
+  background: #e5e5e5;
+}
+
+.chip-row,
+.market,
+.track-place {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.chip {
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid var(--frame);
+  background: #1a1a1a;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.chip.static {
+  cursor: default;
+}
+
+.chip.action {
+  cursor: pointer;
+}
+
+.chip.action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.chip.dice {
+  min-width: 1.4rem;
+  text-align: center;
+}
+
+.colour-market,
+.race-bet {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.colour-market .piece,
+.race-bet .piece {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+/* track */
+
+.track-finished {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+.track-line {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  align-items: flex-end;
+  min-height: 5.5rem;
+}
+
+.track-space {
+  min-width: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.track-stack {
+  min-height: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1px;
+}
+
+.track-label {
+  font-size: 0.65rem;
+  color: var(--ink-muted);
+}
+
+.track-modifier {
+  font-size: 0.7rem;
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.track-modifier .mod-owner {
+  font-size: 0.55rem;
+  color: var(--ink-muted);
+}
+
+.side-jump {
+  color: var(--accent);
+}
+
+.side-fall_back {
+  color: #fbbf24;
+}
+
+/* panels */
+
+.panel-lead {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.score-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+
+.opponents-dump {
+  margin: 0;
+  font: inherit;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 10rem;
+  overflow: auto;
+}
+
+.history-panel {
+  max-height: 10rem;
+  overflow: auto;
+}
+
+.history-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
 }

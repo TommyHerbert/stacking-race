@@ -1,26 +1,50 @@
-import type { GameState } from '@stacking-race/engine';
-import { useState } from 'preact/hooks';
+import {
+  apply,
+  legalActions,
+  type Action,
+  type GameState,
+} from '@stacking-race/engine';
+import { useMemo, useState } from 'preact/hooks';
+import { LegView } from './LegView';
+import { RaceView } from './RaceView';
+import { TrackView } from './TrackView';
+import { shortColour } from './pieceStyle';
 
 type Panel = 'none' | 'score' | 'opponents' | 'history' | 'options';
 
 type GameScreenProps = {
   game: GameState;
+  onGameChange: (state: GameState) => void;
   onBackToMenu: () => void;
 };
 
-/**
- * Game chrome: labeled empty zones. Content fills in later commits.
- */
 export function GameScreen({
   game,
+  onGameChange,
   onBackToMenu,
 }: GameScreenProps) {
   const [panel, setPanel] = useState<Panel>('none');
+  const legal = useMemo(() => legalActions(game), [game]);
 
   function toggle(next: Panel) {
     setPanel((current) => (current === next ? 'none' : next));
   }
 
+  function handleAction(action: Action) {
+    if (game.phase !== 'turn') {
+      return;
+    }
+    try {
+      onGameChange(apply(game, action));
+      setPanel('none');
+    } catch {
+      // Illegal tap — ignore.
+    }
+  }
+
+  const active = game.players.find(
+    (player) => player.seat === game.activePlayer,
+  );
   const turnLabel =
     game.phase === 'game_over'
       ? 'Game over'
@@ -63,15 +87,9 @@ export function GameScreen({
 
       {panel !== 'none' && (
         <section class="game-panel" aria-label={panel}>
-          {panel === 'score' && (
-            <p class="zone-empty">Score panel — content next.</p>
-          )}
-          {panel === 'opponents' && (
-            <p class="zone-empty">Opponents panel — content next.</p>
-          )}
-          {panel === 'history' && (
-            <p class="zone-empty">History panel — content next.</p>
-          )}
+          {panel === 'score' && <ScorePanel game={game} />}
+          {panel === 'opponents' && <OpponentsPanel game={game} />}
+          {panel === 'history' && <HistoryPanel game={game} />}
           {panel === 'options' && (
             <div class="options-panel">
               <button
@@ -88,40 +106,95 @@ export function GameScreen({
 
       <p class="game-turn" aria-live="polite">
         {turnLabel}
+        {active != null && game.phase === 'turn' && (
+          <span class="turn-points"> · {active.points} pts</span>
+        )}
       </p>
 
-      <section class="game-track zone" aria-label="Track">
-        <h2 class="zone-title">Track</h2>
-        <p class="zone-empty">Number-line arrives next.</p>
-      </section>
+      <TrackView game={game} legal={legal} onAction={handleAction} />
+      <LegView game={game} legal={legal} onAction={handleAction} />
+      <RaceView game={game} legal={legal} onAction={handleAction} />
+    </div>
+  );
+}
 
-      <section class="game-leg zone" aria-label="Leg">
-        <h2 class="zone-title">Leg</h2>
-        <div class="split-row">
-          <div class="split-pane">
-            <h3 class="pane-title">Hand</h3>
-            <p class="zone-empty">—</p>
-          </div>
-          <div class="split-pane">
-            <h3 class="pane-title">Stacks</h3>
-            <p class="zone-empty">—</p>
-          </div>
-        </div>
-      </section>
+function ScorePanel({ game }: { game: GameState }) {
+  const active = game.activePlayer;
+  return (
+    <div class="score-panel">
+      <p class="panel-lead">
+        {active != null
+          ? `Player ${active}: ${
+              game.players.find((player) => player.seat === active)?.points ?? 0
+            } pts`
+          : 'Scores'}
+      </p>
+      <ul class="score-list">
+        {game.players.map((player) => (
+          <li key={player.seat}>
+            <strong>{player.seat}</strong> {player.points}
+            {player.seat === active ? ' ←' : ''}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
-      <section class="game-race zone" aria-label="Race">
-        <h2 class="zone-title">Race</h2>
-        <div class="split-row">
-          <div class="split-pane">
-            <h3 class="pane-title">Hand</h3>
-            <p class="zone-empty">—</p>
-          </div>
-          <div class="split-pane">
-            <h3 class="pane-title">Stacks</h3>
-            <p class="zone-empty">—</p>
-          </div>
-        </div>
-      </section>
+function OpponentsPanel({ game }: { game: GameState }) {
+  return (
+    <pre class="opponents-dump">
+      {game.players
+        .map((player) => {
+          const bets = player.legBets
+            .map((bet) =>
+              bet.kind === 'winner'
+                ? `${shortColour(bet.colour)}${bet.value}`
+                : `${shortColour(bet.colour)}M`,
+            )
+            .join(' ');
+          const race = player.raceBetsRemaining.map(shortColour).join('');
+          const tile = player.modifierInHand ? 'tile' : 'tile@board';
+          return `${player.seat}:${player.points}p dice${player.diceCount} [${bets || '—'}] race(${race || '—'}) ${tile}`;
+        })
+        .join('\n')}
+      {'\n'}
+      track:
+      {game.track
+        .map((cell, space) => {
+          if (cell.stack.length === 0 && cell.modifier == null) {
+            return null;
+          }
+          const stack = cell.stack.map(shortColour).join('');
+          const mod =
+            cell.modifier == null
+              ? ''
+              : cell.modifier.side === 'jump'
+                ? `↗${cell.modifier.owner}`
+                : `↙${cell.modifier.owner}`;
+          return ` ${space + 1}:${stack}${mod}`;
+        })
+        .filter(Boolean)
+        .join('')}
+      {'\n'}
+      W×{game.raceWinnerPile.length} L×{game.raceLoserPile.length} dice×
+      {game.diceRemaining}
+    </pre>
+  );
+}
+
+function HistoryPanel({ game }: { game: GameState }) {
+  return (
+    <div class="history-panel">
+      {game.history.length === 0 ? (
+        <p class="zone-empty">No events yet.</p>
+      ) : (
+        <ol class="history-list">
+          {game.history.map((line, index) => (
+            <li key={`${index}-${line}`}>{line}</li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
