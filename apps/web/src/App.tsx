@@ -67,6 +67,10 @@ export function App() {
         ) : game != null ? (
           <GameScreen
             game={game}
+            onGameChange={(state) => {
+              saveContinueGame(state);
+              setGame(state);
+            }}
             onBackToMenu={backToMenu}
           />
         ) : (
