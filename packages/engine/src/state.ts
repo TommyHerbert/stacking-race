@@ -30,6 +30,7 @@ export function createEmptyGameState(rngSeed: number): GameState {
     players: [],
     raceWinnerPile: [],
     raceLoserPile: [],
+    crossedFinish: [],
     history: [],
   };
 }

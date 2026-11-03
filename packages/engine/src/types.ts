@@ -70,6 +70,11 @@ export type GameState = {
   players: PlayerState[];
   raceWinnerPile: RaceBetPileEntry[];
   raceLoserPile: RaceBetPileEntry[];
+  /**
+   * Pieces that have crossed the finish, lead-first
+   * (top of the finishing stack first, then down the column).
+   */
+  crossedFinish: PieceColour[];
   /** Player-facing history lines (glossary terms only). */
   history: string[];
 };

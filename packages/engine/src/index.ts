@@ -66,3 +66,14 @@ export { IllegalActionError, apply, legalActions } from './actions.js';
 
 export type { MoveResult } from './move.js';
 export { movePieceForward } from './move.js';
+
+export { rankPiecesLeadFirst, ranksByColour } from './ranking.js';
+export type { PieceRank } from './ranking.js';
+
+export {
+  applyLegScoring,
+  applyRaceBetScoring,
+  cleanupAfterLeg,
+  resolveLegEnd,
+  resolveRaceEnd,
+} from './score.js';

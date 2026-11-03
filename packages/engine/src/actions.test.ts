@@ -204,19 +204,32 @@ describe('take dice', () => {
     expect(afterA.activePlayer).toBe('B');
   });
 
-  it('enters leg_score after the fifth dice of the leg', () => {
+  it('scores and starts a new leg after the fifth dice', () => {
     let state = createGame({ playerCount: 2, rngSeed: 3 });
-    for (let i = 0; i < 4; i += 1) {
-      state = apply(state, { type: 'take_dice' });
-      expect(state.phase).toBe('turn');
-    }
+    const whoTookFifth = (() => {
+      // After 4 dice, active player takes the 5th.
+      for (let i = 0; i < 4; i += 1) {
+        state = apply(state, { type: 'take_dice' });
+        expect(state.phase).toBe('turn');
+      }
+      return state.activePlayer;
+    })();
 
     state = apply(state, { type: 'take_dice' });
-    expect(state.phase).toBe('leg_score');
-    expect(state.diceRemaining).toBe(0);
-    expect(state.dicePool).toEqual([]);
-    expect(state.diceUsed).toHaveLength(5);
-    expect(legalActions(state)).toEqual([]);
+    expect(state.phase).toBe('turn');
+    expect(state.diceRemaining).toBe(5);
+    expect(state.dicePool).toEqual([...PIECE_COLOURS]);
+    expect(state.diceUsed).toEqual([]);
+    expect(state.players.every((player) => player.legBets.length === 0)).toBe(
+      true,
+    );
+    expect(state.startPlayerThisLeg).toBe(
+      whoTookFifth === 'A' ? 'B' : 'A',
+    );
+    expect(state.activePlayer).toBe(state.startPlayerThisLeg);
+    expect(state.history.some((line) => line.startsWith('Leg scored.'))).toBe(
+      true,
+    );
   });
 });
 
