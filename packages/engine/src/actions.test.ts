@@ -8,19 +8,6 @@ import {
   legalActions,
 } from './index.js';
 
-describe('legalActions / apply (unimplemented families)', () => {
-  it('rejects action families that are not implemented yet', () => {
-    const state = createGame({ playerCount: 2, rngSeed: 1 });
-    expect(() =>
-      apply(state, {
-        type: 'place_race_bet',
-        colour: 'blue',
-        target: 'winner',
-      }),
-    ).toThrow(IllegalActionError);
-  });
-});
-
 describe('take leg bet', () => {
   it('lists all available winner and midfield bets at leg start', () => {
     const state = createGame({ playerCount: 2, rngSeed: 1 });
@@ -230,5 +217,77 @@ describe('take dice', () => {
     expect(state.dicePool).toEqual([]);
     expect(state.diceUsed).toHaveLength(5);
     expect(legalActions(state)).toEqual([]);
+  });
+});
+
+describe('place race bet', () => {
+  it('lists winner and loser placements for each held race bet', () => {
+    const state = createGame({ playerCount: 2, rngSeed: 1 });
+    const raceBets = legalActions(state).filter(
+      (action) => action.type === 'place_race_bet',
+    );
+
+    expect(raceBets).toEqual(
+      PIECE_COLOURS.flatMap((colour) => [
+        { type: 'place_race_bet', colour, target: 'winner' },
+        { type: 'place_race_bet', colour, target: 'loser' },
+      ]),
+    );
+  });
+
+  it('places a race bet on the overall winner pile and advances the turn', () => {
+    const state = createGame({ playerCount: 2, rngSeed: 1 });
+    const next = apply(state, {
+      type: 'place_race_bet',
+      colour: 'blue',
+      target: 'winner',
+    });
+
+    expect(next.raceWinnerPile).toEqual([{ player: 'A', colour: 'blue' }]);
+    expect(next.raceLoserPile).toEqual([]);
+    expect(next.players[0]?.raceBetsRemaining).not.toContain('blue');
+    expect(next.players[0]?.raceBetsRemaining).toHaveLength(4);
+    expect(next.activePlayer).toBe('B');
+    expect(next.history.at(-1)).toBe(
+      'Player A placed blue race bet on overall winner.',
+    );
+  });
+
+  it('cannot place the same colour twice once it has left the hand', () => {
+    const state = createGame({ playerCount: 2, rngSeed: 1 });
+    const afterA = apply(state, {
+      type: 'place_race_bet',
+      colour: 'orange',
+      target: 'loser',
+    });
+
+    expect(afterA.raceLoserPile).toEqual([{ player: 'A', colour: 'orange' }]);
+    expect(afterA.players[0]?.raceBetsRemaining).not.toContain('orange');
+
+    // B's turn: B may still bet orange, but A no longer can.
+    expect(legalActions(afterA)).toContainEqual({
+      type: 'place_race_bet',
+      colour: 'orange',
+      target: 'winner',
+    });
+
+    const afterB = apply(afterA, {
+      type: 'place_race_bet',
+      colour: 'blue',
+      target: 'winner',
+    });
+    expect(afterB.activePlayer).toBe('A');
+    expect(legalActions(afterB)).not.toContainEqual({
+      type: 'place_race_bet',
+      colour: 'orange',
+      target: 'winner',
+    });
+    expect(() =>
+      apply(afterB, {
+        type: 'place_race_bet',
+        colour: 'orange',
+        target: 'winner',
+      }),
+    ).toThrow(IllegalActionError);
   });
 });
