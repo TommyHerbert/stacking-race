@@ -325,13 +325,8 @@ body {
 
 .chip {
   font: inherit;
-<<<<<<< HEAD
-  font-size: 0.7rem;
-  padding: 0.25rem 0.35rem;
-=======
   font-size: 0.85rem;
   padding: 0.45rem 0.55rem;
->>>>>>> cursor/game-ui-content-0810
   border: 1px solid var(--frame);
   background: #1a1a1a;
   color: var(--ink);

@@ -28,3 +28,26 @@ Open the printed local URL (phone-portrait shell).
 ```bash
 pnpm build
 ```
+
+## Android (offline APK)
+
+Capacitor wraps `apps/web`. Native project: `apps/web/android`.
+
+Needs `ANDROID_HOME` (e.g. `~/Android/Sdk`) and a JDK that can run the Gradle wrapper (Java 25 works with the pinned Gradle 9.1).
+
+```bash
+export ANDROID_HOME="$HOME/Android/Sdk"
+export PATH="$ANDROID_HOME/platform-tools:$PATH"
+
+pnpm android:apk
+```
+
+Debug APK: `apps/web/android/app/build/outputs/apk/debug/app-debug.apk`
+
+Install on a USB-debugging phone:
+
+```bash
+adb install -r apps/web/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Or copy the APK to the phone and open it (allow install from that source).

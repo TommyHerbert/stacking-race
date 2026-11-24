@@ -10,3 +10,15 @@ coverage
 .env
 .env.*
 !/.env.example
+
+# Android / Capacitor
+apps/web/android/app/build
+apps/web/android/build
+apps/web/android/.gradle
+apps/web/android/local.properties
+apps/web/android/captures
+apps/web/android/.idea
+*.apk
+*.aab
+*.ap_
+*.dex
