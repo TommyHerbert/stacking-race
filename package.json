@@ -7,7 +7,9 @@
     "dev": "pnpm --filter @stacking-race/web dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter @stacking-race/engine test"
+    "test": "pnpm --filter @stacking-race/engine test",
+    "android:sync": "pnpm --filter @stacking-race/web android:sync",
+    "android:apk": "pnpm --filter @stacking-race/web android:apk"
   },
   "engines": {
     "node": ">=20"
