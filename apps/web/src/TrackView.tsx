@@ -87,7 +87,7 @@ export function TrackView({ game, legal, onAction }: TrackViewProps) {
                   {sides.includes('jump') && (
                     <button
                       type="button"
-                      class="chip"
+                      class="chip action"
                       onClick={() =>
                         onAction({
                           type: 'place_modifier',
@@ -102,7 +102,7 @@ export function TrackView({ game, legal, onAction }: TrackViewProps) {
                   {sides.includes('fall_back') && (
                     <button
                       type="button"
-                      class="chip"
+                      class="chip action"
                       onClick={() =>
                         onAction({
                           type: 'place_modifier',
